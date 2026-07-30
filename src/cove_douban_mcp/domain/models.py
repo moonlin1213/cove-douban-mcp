@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import AliasChoices, BaseModel, ConfigDict, Field, model_validator
 
 
 class PublicModel(BaseModel):
@@ -53,13 +53,27 @@ class ToolEnvelope(PublicModel):
 
 
 class MovieMark(PublicModel):
-    movie_id: str = ""
+    movie_id: str = Field(default="", validation_alias=AliasChoices("movie_id", "movieId"))
     title: str = ""
     url: str = ""
-    status: Literal["wish", "collect", "do"] | None = None
-    rating: float | None = Field(default=None, ge=0, le=10)
-    marked_at: str = ""
-    comment: str = ""
+    status: Literal["wish", "collect", "do"] | None = Field(
+        default=None,
+        validation_alias=AliasChoices("status", "myStatus"),
+    )
+    rating: float | None = Field(
+        default=None,
+        ge=0,
+        le=10,
+        validation_alias=AliasChoices("rating", "myRating"),
+    )
+    marked_at: str = Field(
+        default="",
+        validation_alias=AliasChoices("marked_at", "myDate"),
+    )
+    comment: str = Field(
+        default="",
+        validation_alias=AliasChoices("comment", "myComment"),
+    )
     year: int | None = Field(default=None, ge=1800, le=3000)
     cover_url: str = ""
     genres: list[str] = Field(default_factory=list)
@@ -75,55 +89,116 @@ class MovieMark(PublicModel):
 
 
 class SearchResult(PublicModel):
-    subject_id: str = ""
+    subject_id: str = Field(
+        default="",
+        validation_alias=AliasChoices("subject_id", "subjectId", "id"),
+    )
     title: str
     url: str = ""
-    media_type: str = ""
+    media_type: str = Field(
+        default="",
+        validation_alias=AliasChoices("media_type", "mediaType", "type"),
+    )
     year: int | None = None
     rating: float | None = None
-    cover_url: str = ""
+    cover_url: str = Field(
+        default="",
+        validation_alias=AliasChoices("cover_url", "coverUrl", "cover"),
+    )
+    abstract: str = ""
 
 
 class Subject(PublicModel):
-    subject_id: str = ""
+    subject_id: str = Field(
+        default="",
+        validation_alias=AliasChoices("subject_id", "subjectId", "id"),
+    )
     title: str
     url: str = ""
-    media_type: str = ""
+    media_type: str = Field(
+        default="",
+        validation_alias=AliasChoices("media_type", "mediaType", "type"),
+    )
     year: int | None = None
     rating: float | None = None
-    rating_count: int | None = None
+    rating_count: int | None = Field(
+        default=None,
+        validation_alias=AliasChoices("rating_count", "ratingCount"),
+    )
     summary: str = ""
     genres: list[str] = Field(default_factory=list)
-    countries: list[str] = Field(default_factory=list)
+    countries: list[str] = Field(
+        default_factory=list,
+        validation_alias=AliasChoices("countries", "country"),
+    )
     directors: list[str] = Field(default_factory=list)
     casts: list[str] = Field(default_factory=list)
 
 
 class Review(PublicModel):
-    review_id: str = ""
-    subject_id: str = ""
+    review_id: str = Field(
+        default="",
+        validation_alias=AliasChoices("review_id", "reviewId"),
+    )
+    subject_id: str = Field(
+        default="",
+        validation_alias=AliasChoices("subject_id", "subjectId", "movieId"),
+    )
     title: str = ""
     author: str = ""
-    rating: float | None = None
-    created_at: str = ""
+    rating: float | None = Field(
+        default=None,
+        validation_alias=AliasChoices("rating", "myRating"),
+    )
+    created_at: str = Field(
+        default="",
+        validation_alias=AliasChoices("created_at", "createdAt"),
+    )
     summary: str = ""
+    content: str = ""
+    movie_title: str = Field(
+        default="",
+        validation_alias=AliasChoices("movie_title", "movieTitle"),
+    )
+    votes: int | None = None
     url: str = ""
 
 
 class Doulist(PublicModel):
-    doulist_id: str = ""
+    doulist_id: str = Field(
+        default="",
+        validation_alias=AliasChoices("doulist_id", "doulistId", "id"),
+    )
     title: str
     url: str = ""
-    item_count: int | None = None
-    updated_at: str = ""
+    item_count: int | None = Field(
+        default=None,
+        validation_alias=AliasChoices("item_count", "itemCount", "count"),
+    )
+    updated_at: str = Field(
+        default="",
+        validation_alias=AliasChoices("updated_at", "updatedAt"),
+    )
+    kind: str = "all"
+    description: str = ""
 
 
 class DoulistItem(PublicModel):
-    item_id: str = ""
-    subject_id: str = ""
+    item_id: str = Field(
+        default="",
+        validation_alias=AliasChoices("item_id", "itemId"),
+    )
+    subject_id: str = Field(
+        default="",
+        validation_alias=AliasChoices("subject_id", "subjectId"),
+    )
     title: str
     url: str = ""
-    media_type: str = ""
+    media_type: str = Field(
+        default="",
+        validation_alias=AliasChoices("media_type", "mediaType", "type"),
+    )
     year: int | None = None
     rating: float | None = None
     note: str = ""
+    abstract: str = ""

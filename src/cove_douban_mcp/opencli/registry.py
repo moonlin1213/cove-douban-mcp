@@ -44,6 +44,7 @@ ALLOWED_COMMANDS: dict[str, CommandSpec] = {
         {
             "--status": frozenset({"wish", "collect", "do"}),
             "--uid": None,
+            "--limit": None,
         },
     ),
     "reviews": CommandSpec(
@@ -112,4 +113,3 @@ def validate_arguments(command: str, arguments: list[str]) -> list[str]:
     if not spec.minimum_positionals <= len(positionals) <= spec.maximum_positionals:
         raise _invalid(f"invalid number of positional arguments for {command}")
     return list(arguments)
-
