@@ -74,16 +74,34 @@ flowchart LR
 
 ## 安装
 
-仓库发布前，可在克隆目录中安装：
+### 方法一：从 GitHub Release 安装（推荐）
+
+打开
+[Releases](../../releases/latest)，
+下载 `cove_douban_mcp-0.1.0-py3-none-any.whl`，然后在下载目录运行：
 
 ```bash
-uv tool install .
+uv tool install ./cove_douban_mcp-0.1.0-py3-none-any.whl
 ```
 
-发布到包索引后：
+没有使用 `uv` 时，也可以安装到当前 Python 环境：
 
 ```bash
-uv tool install cove-douban-mcp
+python -m pip install ./cove_douban_mcp-0.1.0-py3-none-any.whl
+```
+
+Windows 如果使用 Python Launcher，可以运行：
+
+```powershell
+py -m pip install .\cove_douban_mcp-0.1.0-py3-none-any.whl
+```
+
+### 方法二：从源码安装
+
+```bash
+git clone <repository-url>
+cd cove-douban-mcp
+uv tool install .
 ```
 
 先看安装计划，不改任何文件：
