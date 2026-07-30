@@ -1,0 +1,33 @@
+name: Protected live smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      dedicated_test_account:
+        description: "Confirm the protected runner uses only a dedicated test account"
+        required: true
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  validate-local-bridge:
+    if: ${{ inputs.dedicated_test_account }}
+    runs-on: [self-hosted, macOS, cove-douban-live-smoke]
+    environment: live-smoke
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.13"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: uv sync --frozen --all-groups
+      - run: npm --prefix opencli-plugin ci
+      - name: Validate adapters without emitting result bodies
+        run: npm --prefix opencli-plugin exec opencli -- validate douban
+      - name: Check the protected local Browser Bridge
+        run: npm --prefix opencli-plugin exec opencli -- doctor
+

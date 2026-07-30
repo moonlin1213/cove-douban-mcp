@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "douban": {
+      "command": "cove-douban-mcp",
+      "args": [
+        "serve",
+        "--transport",
+        "stdio"
+      ]
+    }
+  }
+}

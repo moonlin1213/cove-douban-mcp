@@ -1,0 +1,21 @@
+.DS_Store
+.coverage
+.codegraph/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.uv-cache/
+.venv/
+__pycache__/
+*.egg-info/
+*.py[cod]
+build/
+dist/
+node_modules/
+npm-debug.log*
+
+# Runtime state must never enter the public repository.
+.runtime/
+sync.lock
+setup.lock
+*.log

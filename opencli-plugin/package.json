@@ -1,0 +1,16 @@
+{
+  "name": "opencli-plugin-cove-douban-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Read-only Douban adapters bundled with Cove Douban MCP",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs"
+  },
+  "peerDependencies": {
+    "@jackwener/opencli": ">=1.8.0 <2"
+  },
+  "devDependencies": {
+    "jsdom": "26.1.0"
+  }
+}
