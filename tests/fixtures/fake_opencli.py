@@ -44,7 +44,7 @@ def main() -> int:
                 "columns": ["title", "id"],
                 "rows": [{"title": query or f"示例 {command}", "id": "100001"}],
             },
-            ensure_ascii=False,
+            ensure_ascii=True,
         )
     )
     return 0
@@ -52,4 +52,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
