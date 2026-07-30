@@ -79,4 +79,3 @@ def container(tmp_path: Path, gateway: FakeGateway) -> ServiceContainer:
     paths = AppPaths.from_root(tmp_path / "app")
     paths.ensure()
     return ServiceContainer.create(settings=settings, paths=paths, gateway=gateway)
-

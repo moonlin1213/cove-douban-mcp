@@ -4,14 +4,18 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from cove_douban_mcp.config import Settings
+from cove_douban_mcp.config import ExportPolicy, Settings
+from cove_douban_mcp.export.markdown import ExportService
+from cove_douban_mcp.export.proposals import ProposalStore
 from cove_douban_mcp.services.catalog import CatalogService
 from cove_douban_mcp.services.common import Gateway
 from cove_douban_mcp.services.doulists import DoulistsService
+from cove_douban_mcp.services.export import ExportApplicationService
 from cove_douban_mcp.services.marks import MarksService
 from cove_douban_mcp.services.reviews import ReviewsService
 from cove_douban_mcp.services.status import StatusService
 from cove_douban_mcp.services.sync import SyncService
+from cove_douban_mcp.services.working import WorkingResultService
 from cove_douban_mcp.storage.marks_store import MarksStore
 from cove_douban_mcp.storage.paths import AppPaths
 from cove_douban_mcp.storage.query_cache import QueryCache
@@ -34,6 +38,8 @@ class ServiceContainer:
     doulists: DoulistsService
     sync: SyncService
     status: StatusService
+    working: WorkingResultService
+    export: ExportApplicationService
 
     @classmethod
     def create(
@@ -69,6 +75,21 @@ class ServiceContainer:
             paths.cache / "sync.lock",
         )
         status = StatusService(settings, marks_store, sync_state_store)
+        working = WorkingResultService(working_cache)
+        export_root = settings.export.root or paths.root / "disabled-export"
+        export = ExportApplicationService(
+            ExportService(
+                working_cache=working_cache,
+                proposal_store=ProposalStore(paths.proposals),
+                export_root=export_root,
+                policy=(
+                    settings.export.policy
+                    if settings.export.enabled
+                    else ExportPolicy.OFF
+                ),
+                maximum_write_bytes=settings.export.maximum_write_bytes,
+            )
+        )
         return cls(
             settings=settings,
             paths=paths,
@@ -83,4 +104,6 @@ class ServiceContainer:
             doulists=doulists,
             sync=sync,
             status=status,
+            working=working,
+            export=export,
         )
