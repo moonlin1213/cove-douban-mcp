@@ -43,10 +43,6 @@ dev = [
 [project.scripts]
 cove-douban-mcp = "cove_douban_mcp.cli:main"
 
-[project.urls]
-Homepage = "https://github.com/example/cove-douban-mcp"
-Issues = "https://github.com/example/cove-douban-mcp/issues"
-
 [tool.hatch.build.targets.wheel]
 packages = ["src/cove_douban_mcp"]
 
@@ -85,4 +81,3 @@ python_version = "3.11"
 strict = true
 packages = ["cove_douban_mcp"]
 mypy_path = "src"
-
