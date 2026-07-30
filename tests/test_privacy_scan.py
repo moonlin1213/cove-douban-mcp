@@ -3,10 +3,10 @@ import subprocess
 from pathlib import Path
 
 
-def test_tracked_public_files_contain_no_private_identity_or_secret_shape() -> None:
+def test_public_files_contain_no_private_identity_or_secret_shape() -> None:
     root = Path(__file__).parents[1]
-    tracked = subprocess.run(
-        ["git", "ls-files"],
+    public_files = subprocess.run(
+        ["git", "ls-files", "--cached", "--others", "--exclude-standard"],
         cwd=root,
         check=True,
         capture_output=True,
@@ -29,7 +29,7 @@ def test_tracked_public_files_contain_no_private_identity_or_secret_shape() -> N
         )
         if (root / path).exists()
     ]
-    candidates = sorted(set(tracked + staged_or_untracked))
+    candidates = sorted(set(public_files + staged_or_untracked))
     forbidden_literals = (
         "moon" + "lin",
         "Aions" + "Home",

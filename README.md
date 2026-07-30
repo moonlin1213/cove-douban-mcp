@@ -131,6 +131,8 @@ cove-douban-mcp serve --transport streamable-http
 
 默认端点是 `http://127.0.0.1:8765/mcp`。首次启动会在应用数据目录生成
 至少 256 位的本地 token；服务不会把 token 打到日志或 MCP 结果中。
+macOS 使用仅限文件所有者的权限，Windows 使用 `icacls` 移除继承权限并
+只授权当前用户；如果无法建立这层保护，本地 HTTP 会拒绝启动并清理新令牌。
 
 完整结构见
 [examples/generic-streamable-http.json](examples/generic-streamable-http.json)。

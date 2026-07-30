@@ -56,10 +56,17 @@ or Windows junction leading outside the root.
 Do not expose the service on a LAN address. Non-loopback binds are rejected
 before server startup.
 
+## Windows reports a credential ACL error
+
+Run the terminal as the same Windows account that will run the MCP client and
+confirm the built-in `icacls` command is available. The service intentionally
+refuses local HTTP startup when it cannot remove inherited access and grant
+the credential only to the current user. Stdio transport does not create an
+HTTP credential and remains available.
+
 ## Source layout changed
 
 Run the synthetic plugin tests and isolated validation, then open a minimal
 issue containing the command, stable error code, operating system, Python
 version, OpenCLI version, and a redacted description. Never attach cookies,
 account pages, full browser traces, or private result bodies.
-

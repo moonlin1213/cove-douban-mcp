@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import secrets
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -58,9 +59,28 @@ class AuthenticatedASGI:
 
 def load_or_create_http_token(path: Path) -> str:
     if path.exists():
+        make_file_private(path, require_strong=True)
         return path.read_text(encoding="utf-8").strip()
     path.parent.mkdir(parents=True, exist_ok=True)
     token = secrets.token_urlsafe(32)
-    path.write_text(f"{token}\n", encoding="utf-8", newline="\n")
-    make_file_private(path)
+    try:
+        descriptor = os.open(
+            path,
+            os.O_WRONLY | os.O_CREAT | os.O_EXCL,
+            0o600,
+        )
+    except FileExistsError:
+        return load_or_create_http_token(path)
+    try:
+        with os.fdopen(
+            descriptor,
+            "w",
+            encoding="utf-8",
+            newline="\n",
+        ) as token_file:
+            token_file.write(f"{token}\n")
+        make_file_private(path, require_strong=True)
+    except BaseException:
+        path.unlink(missing_ok=True)
+        raise
     return token

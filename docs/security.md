@@ -39,7 +39,11 @@ Streamable HTTP:
 - requires a randomly generated token with at least 256 bits of entropy;
 - compares credentials in constant time;
 - rejects any supplied Origin not explicitly allowed;
-- stores the token with owner-only permissions where POSIX modes exist.
+- stores the token with owner-only mode `0600` on POSIX;
+- uses shell-free `icacls` on Windows to remove inherited entries and grant
+  access only to the current user;
+- aborts local HTTP startup and removes a newly created credential if the
+  required Windows ACL cannot be established.
 
 A browser frontend should never embed this token in public JavaScript. Use a
 same-machine backend or stdio.
@@ -72,4 +76,3 @@ Visible website structure can change. A changed selector should produce a
 typed source error, but a new layout may require an adapter update. CI uses
 synthetic fixtures and cannot prove that a private account page is currently
 unchanged. Optional live smoke checks must use a dedicated test account.
-

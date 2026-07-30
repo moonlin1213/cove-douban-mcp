@@ -1,7 +1,10 @@
+import os
+
 import pytest
 from starlette.testclient import TestClient
 
 from cove_douban_mcp.domain.errors import DoubanError
+from cove_douban_mcp.mcp import auth as auth_module
 from cove_douban_mcp.mcp.auth import LocalBearerAuth, load_or_create_http_token
 from cove_douban_mcp.mcp.server import create_mcp_server
 from cove_douban_mcp.mcp.transport import build_http_app, validate_loopback_host
@@ -67,4 +70,23 @@ def test_generated_http_token_is_private_and_stable(tmp_path) -> None:
 
     assert first == second
     assert len(first) >= 43
-    assert path.stat().st_mode & 0o077 == 0
+    if os.name != "nt":
+        assert path.stat().st_mode & 0o077 == 0
+
+
+def test_failed_strong_permissions_remove_new_http_token(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    path = tmp_path / "http-token"
+
+    def reject_permissions(_path, *, require_strong=False) -> None:
+        assert require_strong is True
+        raise PermissionError("could not establish a current-user-only ACL")
+
+    monkeypatch.setattr(auth_module, "make_file_private", reject_permissions)
+
+    with pytest.raises(PermissionError, match="current-user-only ACL"):
+        load_or_create_http_token(path)
+
+    assert not path.exists()
