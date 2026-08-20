@@ -208,7 +208,10 @@ def _container(paths: AppPaths, environ: Mapping[str, str]) -> ServiceContainer:
     return ServiceContainer.create(
         settings=settings,
         paths=paths,
-        gateway=OpenCLIGateway(_opencli_binary(environ)),
+        gateway=OpenCLIGateway(
+            _opencli_binary(environ),
+            lock_path=paths.opencli_lock,
+        ),
     )
 
 

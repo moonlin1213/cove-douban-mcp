@@ -187,6 +187,9 @@ cove-douban-mcp print-config --transport streamable-http
 
 默认同步状态为启用，每日目标时间为本地 `05:10`，默认同步 `wish`、
 `collect` 和豆列。手动调用 `douban_sync` 始终只写内部缓存，不写豆瓣。
+观影标记同步使用有界的轻量列表分块，不会逐条打开影片详情页；已有的类型、
+国家、导演和演员等丰富字段会由非缩水合并保留。多个本地 MCP 进程会串行使用
+同一个 Browser Bridge，避免互相抢占浏览器页面。
 
 ## 可选 Markdown 导出
 

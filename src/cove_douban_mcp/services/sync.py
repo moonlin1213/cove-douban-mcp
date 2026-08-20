@@ -67,62 +67,77 @@ class SyncService:
                     update={"running": True, "last_checked_at": checked, "reason": reason}
                 )
             )
-            for status in requested:
-                try:
-                    result = await self.marks.list_marks(
-                        status=status,
-                        limit=1,
-                        refresh=True,
-                        scope="sync",
-                    )
-                    outcomes[status] = SyncStatusOutcome(
-                        ok=True,
-                        count=result.pagination.total if result.pagination else 0,
-                    )
-                except DoubanError as error:
-                    outcomes[status] = SyncStatusOutcome(
-                        ok=False,
-                        error_code=error.code,
-                        message=error.message,
-                    )
-            if include_doulists:
-                try:
-                    result = await self.doulists.list_doulists(
-                        limit=80,
-                        refresh=True,
-                        scope="sync",
-                    )
-                    list_outcome = SyncStatusOutcome(
-                        ok=True,
-                        count=len(result.data["items"]),
-                    )
-                except DoubanError as error:
-                    list_outcome = SyncStatusOutcome(
-                        ok=False,
-                        error_code=error.code,
-                        message=error.message,
-                    )
+            finalized = False
+            try:
+                for status in requested:
+                    try:
+                        items = await self.marks.refresh_baseline(status)
+                        outcomes[status] = SyncStatusOutcome(
+                            ok=True,
+                            count=len(items),
+                        )
+                    except DoubanError as error:
+                        outcomes[status] = SyncStatusOutcome(
+                            ok=False,
+                            error_code=error.code,
+                            message=error.message,
+                        )
+                if include_doulists:
+                    try:
+                        result = await self.doulists.list_doulists(
+                            limit=80,
+                            refresh=True,
+                            scope="sync",
+                        )
+                        list_outcome = SyncStatusOutcome(
+                            ok=True,
+                            count=len(result.data["items"]),
+                        )
+                    except DoubanError as error:
+                        list_outcome = SyncStatusOutcome(
+                            ok=False,
+                            error_code=error.code,
+                            message=error.message,
+                        )
 
-            success = all(outcome.ok for outcome in outcomes.values()) and (
-                list_outcome is None or list_outcome.ok
-            )
-            finished = datetime.now().astimezone().isoformat()
-            self.state_store.save(
-                SyncState(
-                    last_checked_at=checked,
-                    last_success_at=finished if success else previous.last_success_at,
-                    last_success_local_date=(
-                        today if success else previous.last_success_local_date
-                    ),
-                    reason=reason,
-                    running=False,
-                    statuses={
-                        name: outcome.model_dump(mode="json")
-                        for name, outcome in outcomes.items()
-                    },
-                    last_error="" if success else "one or more read operations failed",
+                success = all(outcome.ok for outcome in outcomes.values()) and (
+                    list_outcome is None or list_outcome.ok
                 )
-            )
+                finished = datetime.now().astimezone().isoformat()
+                self.state_store.save(
+                    SyncState(
+                        last_checked_at=checked,
+                        last_success_at=(
+                            finished if success else previous.last_success_at
+                        ),
+                        last_success_local_date=(
+                            today if success else previous.last_success_local_date
+                        ),
+                        reason=reason,
+                        running=False,
+                        statuses={
+                            name: outcome.model_dump(mode="json")
+                            for name, outcome in outcomes.items()
+                        },
+                        last_error=(
+                            "" if success else "one or more read operations failed"
+                        ),
+                    )
+                )
+                finalized = True
+            finally:
+                if not finalized:
+                    interrupted = self.state_store.load()
+                    self.state_store.save(
+                        interrupted.model_copy(
+                            update={
+                                "running": False,
+                                "last_error": (
+                                    "synchronization interrupted before completion"
+                                ),
+                            }
+                        )
+                    )
         return SyncResult(
             ok=success,
             reason=reason,

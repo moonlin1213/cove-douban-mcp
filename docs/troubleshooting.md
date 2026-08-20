@@ -30,6 +30,17 @@ when one exists; the result includes a warning and `freshness.stale=true`.
 Sign in through the normal Douban page in the same Chrome session OpenCLI
 uses. Do not paste cookies into configuration or issue reports.
 
+## Another browser request is already in progress
+
+All local MCP processes share one Browser Bridge session. If a request returns
+`operation_in_progress`, let the active request finish and retry. The gateway
+rejects overlapping browser work instead of letting two processes navigate the
+same page at once.
+
+An interrupted synchronization clears its `running` state on exit. A state
+left behind by a hard process termination is treated as abandoned after one
+hour and does not permanently block later diagnostics or synchronization.
+
 ## Setup reports an existing adapter
 
 Setup refuses to replace a same-name user adapter. Back up and remove the

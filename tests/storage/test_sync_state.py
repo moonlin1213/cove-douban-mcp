@@ -21,3 +21,18 @@ def test_sync_state_round_trips(tmp_path) -> None:
 
     assert store.load() == expected
 
+
+def test_abandoned_running_state_expires(tmp_path) -> None:
+    store = SyncStateStore(tmp_path / "sync-state.json")
+    store.save(
+        SyncState(
+            running=True,
+            last_checked_at="2000-01-01T00:00:00+00:00",
+            reason="scheduled",
+        )
+    )
+
+    state = store.load()
+
+    assert state.running is False
+    assert state.last_error == "previous synchronization was interrupted"

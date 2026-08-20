@@ -62,6 +62,8 @@ test('reviews extractor returns review and movie identities', () => {
   const rows = extractReviews(fixture('reviews'));
   assert.equal(rows[0].reviewId, '300001');
   assert.equal(rows[0].movieId, '100001');
+  assert.equal(rows[0].movieTitle, '虚构影片');
+  assert.equal(rows[0].title, '虚构影评');
   assert.equal(rows[0].myRating, 8);
   assert.equal(rows[0].votes, 12);
 });

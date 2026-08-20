@@ -2,6 +2,20 @@
 
 All notable changes to this project are documented here.
 
+## Unreleased
+
+### Fixed
+
+- Prefer semantic title and information links over earlier cover links in
+  search, movie-mark, review, and doulist extractors.
+- Wait for the client-side `/mine/` profile redirect before deciding that the
+  active browser session is not signed in.
+- Refresh the durable movie-mark baseline through bounded, lightweight list
+  chunks instead of opening one detail page for every mark.
+- Clear interrupted synchronization state, reconcile abandoned `running`
+  state after one hour, and serialize Browser Bridge access across local MCP
+  processes.
+
 ## 0.1.0 — 2026-07-30
 
 Initial release candidate.
