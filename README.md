@@ -41,7 +41,7 @@ Streamable HTTP。它不依赖 Cove 主程序，也不会读取或修改任何 C
 | `douban_export_markdown` | 按本地权限策略导出 Markdown |
 
 热门榜单、Top 250 等新能力可以在后续版本以新增工具的方式加入，不会破坏
-这 11 个 v0.1.0 工具的合同。
+这 11 个 v0.1.x 工具的合同。
 
 ## 架构
 
@@ -78,22 +78,30 @@ flowchart LR
 
 打开
 [Releases](../../releases/latest)，
-下载 `cove_douban_mcp-0.1.0-py3-none-any.whl`，然后在下载目录运行：
+下载 `cove_douban_mcp-0.1.1-py3-none-any.whl`，然后在下载目录运行：
 
 ```bash
-uv tool install ./cove_douban_mcp-0.1.0-py3-none-any.whl
+uv tool install ./cove_douban_mcp-0.1.1-py3-none-any.whl
 ```
 
 没有使用 `uv` 时，也可以安装到当前 Python 环境：
 
 ```bash
-python -m pip install ./cove_douban_mcp-0.1.0-py3-none-any.whl
+python -m pip install ./cove_douban_mcp-0.1.1-py3-none-any.whl
 ```
 
 Windows 如果使用 Python Launcher，可以运行：
 
 ```powershell
-py -m pip install .\cove_douban_mcp-0.1.0-py3-none-any.whl
+py -m pip install .\cove_douban_mcp-0.1.1-py3-none-any.whl
+```
+
+从 `v0.1.0` 升级时，请替换旧工具并重新安装捆绑的只读 adapter：
+
+```bash
+uv tool install --force ./cove_douban_mcp-0.1.1-py3-none-any.whl
+cove-douban-mcp setup --yes
+cove-douban-mcp doctor --json
 ```
 
 ### 方法二：从源码安装

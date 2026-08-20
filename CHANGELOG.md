@@ -2,7 +2,9 @@
 
 All notable changes to this project are documented here.
 
-## Unreleased
+## 0.1.1 — 2026-08-20
+
+Bugfix release for browser-backed extraction and synchronization reliability.
 
 ### Fixed
 
