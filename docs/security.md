@@ -28,7 +28,8 @@ The gateway uses `asyncio.create_subprocess_exec` with a fixed command
 registry. Unsupported command names and flags fail before process creation.
 Timeouts, malformed output, login requirements, source changes, and bridge
 failures map to stable public error codes. Raw tracebacks and full stderr are
-not returned through MCP.
+not returned through MCP. A shared local file lock prevents separate MCP
+processes from navigating the same Browser Bridge session concurrently.
 
 ## Local HTTP
 

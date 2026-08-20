@@ -82,8 +82,12 @@ export async function resolveUid(page, providedUid = '') {
     return normalized;
   }
   await navigateVisiblePage(page, 'https://www.douban.com/mine/', 'body');
-  const href = await page.evaluate('location.href');
-  const uid = String(href || '').match(/\/people\/([^/]+)/)?.[1] || '';
+  let uid = '';
+  for (let attempt = 0; attempt < 10 && !uid; attempt += 1) {
+    const href = await page.evaluate('location.href');
+    uid = String(href || '').match(/\/people\/([^/]+)/)?.[1] || '';
+    if (!uid && attempt < 9) await page.wait({ time: 0.5 });
+  }
   if (!uid) {
     throw new AuthRequiredError(
       'www.douban.com',
@@ -93,9 +97,15 @@ export async function resolveUid(page, providedUid = '') {
   return uid;
 }
 
-export async function fetchMarkRows(page, uid, status, requestedLimit) {
+export async function fetchMarkRows(
+  page,
+  uid,
+  status,
+  requestedLimit,
+  requestedOffset = 0,
+) {
   const rows = [];
-  let offset = 0;
+  let offset = requestedOffset;
   const maximum = requestedLimit === 0 ? 2000 : requestedLimit;
   while (rows.length < maximum) {
     const url = new URL(`https://movie.douban.com/people/${encodeURIComponent(uid)}/${status}`);
@@ -104,7 +114,7 @@ export async function fetchMarkRows(page, uid, status, requestedLimit) {
     url.searchParams.set('rating', 'all');
     url.searchParams.set('filter', 'all');
     url.searchParams.set('mode', 'grid');
-    await navigateVisiblePage(page, url.toString(), 'body');
+    await navigateVisiblePage(page, url.toString(), '.grid-view, .item');
     const pageRows = await evaluateExtractor(page, extractMarks, status);
     if (!Array.isArray(pageRows)) {
       throw new CommandExecutionError('Douban marks returned an unexpected page shape');
@@ -114,7 +124,7 @@ export async function fetchMarkRows(page, uid, status, requestedLimit) {
     if (pageRows.length < 15) break;
     offset += 15;
   }
-  if (rows.length === 0) {
+  if (rows.length === 0 && requestedOffset === 0) {
     throw new EmptyResultError('douban marks', `No ${status} marks were visible`);
   }
   return requestedLimit === 0 ? rows : rows.slice(0, requestedLimit);
@@ -136,4 +146,3 @@ export async function loadSubjectRow(page, subjectId, subjectType = 'movie') {
   }
   return row;
 }
-

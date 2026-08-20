@@ -19,7 +19,7 @@ const expected = [
 test('plugin declares the supported OpenCLI range and public identity', () => {
   const manifest = JSON.parse(readFileSync(join(root, 'opencli-plugin.json'), 'utf8'));
   assert.equal(manifest.name, 'cove-douban-mcp');
-  assert.equal(manifest.version, '0.1.0');
+  assert.equal(manifest.version, '0.1.1');
   assert.equal(manifest.opencli, '>=1.8.0 <2');
 });
 

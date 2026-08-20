@@ -16,9 +16,10 @@ export function extractSearchResults(document, limit) {
     '.result-item, .item-root, .result-list .result-item',
   );
   for (const node of nodes) {
-    const link = node.querySelector(
-      'h3 a, .title-text, .title a, a[href*="/subject/"]',
-    );
+    const link = node.querySelector('h3 a[href*="/subject/"]')
+      || node.querySelector('.title a[href*="/subject/"]')
+      || node.querySelector('a.title-text[href*="/subject/"]')
+      || node.querySelector('a[href*="/subject/"]');
     if (!link) continue;
     const url = link.href || link.getAttribute('href') || '';
     const id = url.match(/\/subject\/(\d+)/)?.[1] || '';
@@ -131,7 +132,8 @@ export function extractMarks(document, status) {
   const normalize = (value) => String(value || '').replace(/\s+/g, ' ').trim();
   const rows = [];
   for (const item of document.querySelectorAll('.item')) {
-    const link = item.querySelector('.info a[href*="/subject/"], a[href*="/subject/"]');
+    const link = item.querySelector('.info a[href*="/subject/"]')
+      || item.querySelector('a[href*="/subject/"]');
     const url = link?.href || link?.getAttribute('href') || '';
     const movieId = url.match(/\/subject\/(\d+)/)?.[1] || '';
     const titleText = normalize(link?.querySelector('em')?.textContent || link?.textContent);
@@ -172,8 +174,10 @@ export function extractReviews(document) {
   const normalize = (value) => String(value || '').replace(/\s+/g, ' ').trim();
   const rows = [];
   for (const item of document.querySelectorAll('.tlst, .review-item')) {
-    const movieLink = item.querySelector('.ilst a, a[href*="/subject/"]');
-    const reviewLink = item.querySelector('.nlst a[title], a[href*="/review/"]');
+    const movieLink = item.querySelector('.ilst a[href*="/subject/"]')
+      || item.querySelector('a[href*="/subject/"]');
+    const reviewLink = item.querySelector('.nlst a[title][href*="/review/"]')
+      || item.querySelector('a[href*="/review/"]');
     const movieUrl = movieLink?.href || movieLink?.getAttribute('href') || '';
     const reviewUrl = reviewLink?.href || reviewLink?.getAttribute('href') || '';
     const movieId = movieUrl.match(/\/subject\/(\d+)/)?.[1] || '';
@@ -211,7 +215,9 @@ export function extractDoulists(document) {
   for (const item of document.querySelectorAll(
     '.doulist-item, .doulist-list li, .list-item',
   )) {
-    const link = item.querySelector('h3 a, .title a, a[href*="/doulist/"]');
+    const link = item.querySelector('h3 a[href*="/doulist/"]')
+      || item.querySelector('.title a[href*="/doulist/"]')
+      || item.querySelector('a[href*="/doulist/"]');
     const url = link?.href || link?.getAttribute('href') || '';
     const id = url.match(/\/doulist\/(\d+)/)?.[1] || '';
     const title = normalize(link?.textContent);
@@ -236,9 +242,9 @@ export function extractDoulistItems(document) {
   for (const item of document.querySelectorAll(
     '.doulist-item, .doulist-list .item, .article .item',
   )) {
-    const link = item.querySelector(
-      'h3 a, .title a, a[href*="/subject/"]',
-    );
+    const link = item.querySelector('h3 a[href*="/subject/"]')
+      || item.querySelector('.title a[href*="/subject/"]')
+      || item.querySelector('a[href*="/subject/"]');
     const url = link?.href || link?.getAttribute('href') || '';
     const subjectId = url.match(/\/subject\/(\d+)/)?.[1] || '';
     const title = normalize(link?.textContent);

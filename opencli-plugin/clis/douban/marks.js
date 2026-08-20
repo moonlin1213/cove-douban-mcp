@@ -24,6 +24,7 @@ cli({
       help: '标记类型：collect / wish / do / all',
     },
     { name: 'limit', type: 'int', default: 50, help: '返回数量，0 表示全部' },
+    { name: 'offset', type: 'int', default: 0, help: '从第几条标记开始读取' },
     { name: 'uid', default: '', help: '用户 ID；留空读取当前登录账号' },
   ],
   columns: [
@@ -37,15 +38,15 @@ cli({
       'status',
     );
     const limit = normalizeLimit(args.limit, 50, 2000, { allowZero: true });
+    const offset = normalizeLimit(args.offset, 0, 1_000_000, { allowZero: true });
     const uid = await resolveUid(page, args.uid);
     const statuses = status === 'all' ? ['collect', 'wish', 'do'] : [status];
     const rows = [];
     for (const selected of statuses) {
       const remaining = limit === 0 ? 0 : limit - rows.length;
       if (limit > 0 && remaining <= 0) break;
-      rows.push(...await fetchMarkRows(page, uid, selected, remaining));
+      rows.push(...await fetchMarkRows(page, uid, selected, remaining, offset));
     }
     return limit === 0 ? rows : rows.slice(0, limit);
   },
 });
-

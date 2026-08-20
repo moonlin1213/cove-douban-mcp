@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pytest
+from filelock import FileLock
 
 from cove_douban_mcp.domain.errors import DoubanError
 from cove_douban_mcp.opencli.gateway import OpenCLIGateway
@@ -48,3 +49,20 @@ async def test_gateway_maps_timeout(fake_opencli) -> None:
     with pytest.raises(DoubanError, match="source_timeout"):
         await gateway.run("search", ["timeout"])
 
+
+@pytest.mark.asyncio
+async def test_gateway_rejects_concurrent_shared_browser_access(
+    fake_opencli,
+    tmp_path,
+) -> None:
+    lock_path = tmp_path / "opencli-browser.lock"
+    gateway = OpenCLIGateway(
+        fake_opencli,
+        lock_path=lock_path,
+        lock_timeout_seconds=0.01,
+    )
+
+    with FileLock(lock_path), pytest.raises(DoubanError) as captured:
+        await gateway.run("search", ["example"])
+
+    assert captured.value.code == "operation_in_progress"

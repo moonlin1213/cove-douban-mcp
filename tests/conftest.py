@@ -27,9 +27,9 @@ class FakeGateway:
                 safe_error=message,
             )
         rows = self.rows[command]
-        if command == "marks-full":
+        if command in {"marks", "marks-full"}:
             status = arguments[arguments.index("--status") + 1]
-            rows = [
+            mark_rows = [
                 {
                     "movie_id": f"{status}-100001",
                     "title": f"虚构{status}影片",
@@ -39,6 +39,12 @@ class FakeGateway:
                     "year": 2024,
                 }
             ]
+            offset = (
+                int(arguments[arguments.index("--offset") + 1])
+                if "--offset" in arguments
+                else 0
+            )
+            rows = mark_rows[offset:]
         return OpenCLIResult(ok=True, rows=rows)
 
 

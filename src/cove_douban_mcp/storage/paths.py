@@ -17,6 +17,7 @@ class AppPaths:
     query_cache: Path
     marks: Path
     sync_state: Path
+    opencli_lock: Path
     working: Path
     proposals: Path
     logs: Path
@@ -32,6 +33,7 @@ class AppPaths:
             query_cache=cache / "queries.json",
             marks=cache / "movie-marks.json",
             sync_state=cache / "sync-state.json",
+            opencli_lock=cache / "opencli-browser.lock",
             working=cache / "working",
             proposals=root / "proposals",
             logs=root / "logs",
@@ -46,4 +48,3 @@ class AppPaths:
             directory.mkdir(parents=True, exist_ok=True)
             if os.name != "nt":
                 directory.chmod(0o700)
-

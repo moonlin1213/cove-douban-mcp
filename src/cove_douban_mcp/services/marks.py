@@ -6,6 +6,7 @@ from typing import Literal
 
 from cove_douban_mcp.domain.errors import DoubanError
 from cove_douban_mcp.domain.filters import MarkFilters, filter_movie_marks
+from cove_douban_mcp.domain.merge import mark_identity
 from cove_douban_mcp.domain.models import MovieMark, SourceFreshness, ToolEnvelope, ToolError
 from cove_douban_mcp.domain.pagination import paginate
 from cove_douban_mcp.services.common import Gateway, gateway_error, warning_from
@@ -14,6 +15,7 @@ from cove_douban_mcp.storage.query_cache import QueryCache
 from cove_douban_mcp.storage.working_cache import WorkingCache
 
 MarkStatus = Literal["wish", "collect", "do"]
+SYNC_CHUNK_SIZE = 150
 
 
 class MarksService:
@@ -28,6 +30,59 @@ class MarksService:
         self.marks_store = marks_store
         self.query_cache = query_cache
         self.working_cache = working_cache
+
+    async def refresh_baseline(
+        self,
+        status: MarkStatus,
+        *,
+        chunk_size: int = SYNC_CHUNK_SIZE,
+    ) -> list[MovieMark]:
+        """Refresh lightweight marks in bounded browser commands.
+
+        Daily synchronization intentionally avoids ``marks-full`` because that
+        command opens one detail page per mark. Existing rich metadata remains
+        protected by the non-shrinking store merge.
+        """
+
+        if not 1 <= chunk_size <= 2_000:
+            raise DoubanError("invalid_argument", "chunk_size must be 1..2000")
+
+        items: list[MovieMark] = []
+        seen: set[str] = set()
+        offset = 0
+        while True:
+            response = await self.gateway.run(
+                "marks",
+                [
+                    "--status",
+                    status,
+                    "--limit",
+                    str(chunk_size),
+                    "--offset",
+                    str(offset),
+                ],
+            )
+            if not response.ok:
+                raise gateway_error(response)
+
+            page = [MovieMark.model_validate(row) for row in response.rows]
+            new_items = [item for item in page if mark_identity(item) not in seen]
+            if page and not new_items:
+                raise DoubanError(
+                    "source_unavailable",
+                    "Douban marks pagination did not advance",
+                    "Retry after checking the installed OpenCLI adapter version.",
+                )
+            for item in new_items:
+                seen.add(mark_identity(item))
+                items.append(item)
+
+            if len(page) < chunk_size:
+                break
+            offset += len(page)
+
+        self.marks_store.merge_status(status, items)
+        return items
 
     async def _status_items(
         self,
@@ -168,4 +223,3 @@ class MarksService:
             source="profile",
             freshness=SourceFreshness(stale=stale),
         )
-

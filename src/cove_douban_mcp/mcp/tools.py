@@ -1,4 +1,4 @@
-"""The exact public v0.1.0 MCP tool catalog."""
+"""The exact public v0.1.1 MCP tool catalog."""
 
 from __future__ import annotations
 
