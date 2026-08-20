@@ -41,3 +41,17 @@ def test_readme_links_required_public_documents() -> None:
         assert relative in readme
         assert (root / relative).exists()
 
+
+def test_readme_uninstalls_v010_adapters_before_installing_v011() -> None:
+    root = Path(__file__).parents[1]
+    readme = (root / "README.md").read_text(encoding="utf-8")
+    upgrade = readme.split("从 `v0.1.0` 升级", maxsplit=1)[1].split(
+        "### 方法二", maxsplit=1
+    )[0]
+
+    uninstall = upgrade.index("cove-douban-mcp uninstall")
+    install = upgrade.index("uv tool install --force")
+    setup = upgrade.index("cove-douban-mcp setup --yes")
+
+    assert uninstall < install < setup
+    assert "用户修改过的 adapter" in " ".join(upgrade.split())
