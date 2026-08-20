@@ -96,13 +96,19 @@ Windows 如果使用 Python Launcher，可以运行：
 py -m pip install .\cove_douban_mcp-0.1.1-py3-none-any.whl
 ```
 
-从 `v0.1.0` 升级时，请替换旧工具并重新安装捆绑的只读 adapter：
+从 `v0.1.0` 升级时，安装器会刻意拒绝覆盖已有 adapter。请先使用仍在
+运行的旧版卸载未修改的托管文件，再替换工具并安装新版只读 adapter：
 
 ```bash
+cove-douban-mcp uninstall
 uv tool install --force ./cove_douban_mcp-0.1.1-py3-none-any.whl
 cove-douban-mcp setup --yes
 cove-douban-mcp doctor --json
 ```
+
+`uninstall` 只删除内容仍与 `v0.1.0` 安装包一致的 adapter；用户修改过的
+adapter 会保留。如果 `setup` 报告冲突，请先备份并显式移除它报告的文件，
+然后重试。升级过程不会修改 MCP 客户端配置或豆瓣数据。
 
 ### 方法二：从源码安装
 
