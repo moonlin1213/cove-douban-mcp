@@ -24,12 +24,13 @@ Streamable HTTP。它不依赖 Cove 主程序，也不会读取或修改任何 C
 
 ## 能做什么
 
-首个版本保留现有完整能力：
+当前版本提供以下只读能力：
 
 | MCP 工具 | 能力 |
 |---|---|
 | `douban_status` | 本地连接、权限、缓存和同步状态 |
 | `douban_search` | 搜索电影、图书、音乐 |
+| `douban_chart` | 查询电影、图书、音乐的六类固定公开榜单 |
 | `douban_subject` | 查询电影或图书详情 |
 | `douban_movie_marks` | 查询、筛选、分页“看过 / 想看 / 在看” |
 | `douban_reviews` | 查询个人影评，可选完整正文 |
@@ -40,19 +41,20 @@ Streamable HTTP。它不依赖 Cove 主程序，也不会读取或修改任何 C
 | `douban_working_cache_read` | 分页读取完整服务端结果 |
 | `douban_export_markdown` | 按本地权限策略导出 Markdown |
 
-热门榜单、Top 250 等新能力可以在后续版本以新增工具的方式加入，不会破坏
-这 11 个 v0.1.x 工具的合同。
+`douban_chart` 支持电影一周口碑榜、北美票房榜、新片榜、Top 250、热门图书榜
+和热门音乐榜。它只接受固定榜单键与数量，不接受任意网址或浏览器脚本；原有
+11 个 v0.1.x 工具合同保持不变。
 
 ## 架构
 
 ```mermaid
 flowchart LR
     Client["任意标准 MCP 客户端"] --> Transport["stdio / 本机 Streamable HTTP"]
-    Transport --> Tools["11 个薄 MCP 工具"]
+    Transport --> Tools["12 个薄 MCP 工具"]
     Tools --> Services["查询、筛选、同步、导出服务"]
     Services --> Cache["四层私有本地缓存"]
     Services --> Gateway["命令白名单 + 无 shell 子进程"]
-    Gateway --> OpenCLI["7 个只读 OpenCLI adapter"]
+    Gateway --> OpenCLI["8 个只读 OpenCLI adapter"]
     OpenCLI --> Chrome["用户当前 Chrome 会话"]
     Chrome --> Douban["浏览器中本来可见的豆瓣页面"]
 ```
@@ -78,35 +80,35 @@ flowchart LR
 
 打开
 [Releases](../../releases/latest)，
-下载 `cove_douban_mcp-0.1.1-py3-none-any.whl`，然后在下载目录运行：
+下载 `cove_douban_mcp-0.2.0-py3-none-any.whl`，然后在下载目录运行：
 
 ```bash
-uv tool install ./cove_douban_mcp-0.1.1-py3-none-any.whl
+uv tool install ./cove_douban_mcp-0.2.0-py3-none-any.whl
 ```
 
 没有使用 `uv` 时，也可以安装到当前 Python 环境：
 
 ```bash
-python -m pip install ./cove_douban_mcp-0.1.1-py3-none-any.whl
+python -m pip install ./cove_douban_mcp-0.2.0-py3-none-any.whl
 ```
 
 Windows 如果使用 Python Launcher，可以运行：
 
 ```powershell
-py -m pip install .\cove_douban_mcp-0.1.1-py3-none-any.whl
+py -m pip install .\cove_douban_mcp-0.2.0-py3-none-any.whl
 ```
 
-从 `v0.1.0` 升级时，安装器会刻意拒绝覆盖已有 adapter。请先使用仍在
+从 `v0.1.x` 升级时，安装器会刻意拒绝覆盖已有 adapter。请先使用仍在
 运行的旧版卸载未修改的托管文件，再替换工具并安装新版只读 adapter：
 
 ```bash
 cove-douban-mcp uninstall
-uv tool install --force ./cove_douban_mcp-0.1.1-py3-none-any.whl
+uv tool install --force ./cove_douban_mcp-0.2.0-py3-none-any.whl
 cove-douban-mcp setup --yes
 cove-douban-mcp doctor --json
 ```
 
-`uninstall` 只删除内容仍与 `v0.1.0` 安装包一致的 adapter；用户修改过的
+`uninstall` 只删除内容仍与当时安装包一致的 adapter；用户修改过的
 adapter 会保留。如果 `setup` 报告冲突，请先备份并显式移除它报告的文件，
 然后重试。升级过程不会修改 MCP 客户端配置或豆瓣数据。
 
@@ -124,7 +126,7 @@ uv tool install .
 cove-douban-mcp setup --dry-run
 ```
 
-确认后安装默认配置和七个只读 adapter：
+确认后安装默认配置和八个只读 adapter：
 
 ```bash
 cove-douban-mcp setup --yes
@@ -183,7 +185,7 @@ cove-douban-mcp print-config --transport streamable-http
 2. 确认 OpenCLI Browser Bridge 可用。
 3. 运行 `cove-douban-mcp doctor --json`。
 4. 在 MCP 客户端调用 `douban_status`。
-5. 用 `douban_search` 或 `douban_movie_marks` 做第一条只读查询。
+5. 用 `douban_search`、`douban_chart` 或 `douban_movie_marks` 做第一条只读查询。
 
 `doctor` 不执行私有账号数据抓取，只检查本地文件、插件和 OpenCLI 可执行文件。
 

@@ -108,6 +108,29 @@ class SearchResult(PublicModel):
     abstract: str = ""
 
 
+class ChartItem(PublicModel):
+    rank: int = Field(ge=1)
+    subject_id: str = Field(
+        default="",
+        validation_alias=AliasChoices("subject_id", "subjectId", "id"),
+    )
+    title: str
+    url: str = ""
+    rating: float | None = Field(default=None, ge=0, le=10)
+    rating_count: int | None = Field(
+        default=None,
+        ge=0,
+        validation_alias=AliasChoices("rating_count", "ratingCount", "votes"),
+    )
+    year: int | None = Field(default=None, ge=1800, le=3000)
+    summary: str = ""
+    trend: str = ""
+    chart_note: str = Field(
+        default="",
+        validation_alias=AliasChoices("chart_note", "chartNote"),
+    )
+
+
 class Subject(PublicModel):
     subject_id: str = Field(
         default="",

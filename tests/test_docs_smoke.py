@@ -42,10 +42,10 @@ def test_readme_links_required_public_documents() -> None:
         assert (root / relative).exists()
 
 
-def test_readme_uninstalls_v010_adapters_before_installing_v011() -> None:
+def test_readme_uninstalls_v01x_adapters_before_installing_v020() -> None:
     root = Path(__file__).parents[1]
     readme = (root / "README.md").read_text(encoding="utf-8")
-    upgrade = readme.split("从 `v0.1.0` 升级", maxsplit=1)[1].split(
+    upgrade = readme.split("从 `v0.1.x` 升级", maxsplit=1)[1].split(
         "### 方法二", maxsplit=1
     )[0]
 

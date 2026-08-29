@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "cove-douban-mcp"
-version = "0.1.1"
+version = "0.2.0"
 description = "A privacy-safe, read-only Douban MCP server for local clients."
 readme = "README.md"
 requires-python = ">=3.11,<3.14"
@@ -37,7 +37,7 @@ dev = [
   "pytest>=8.4,<9",
   "pytest-asyncio>=1.1,<2",
   "ruff>=0.12,<1",
-  "twine>=6.1,<7",
+  "twine>=7,<8",
 ]
 
 [project.scripts]

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { fetchMarkRows, resolveUid } from '../clis/douban/utils.js';
+import { fetchChartRows, fetchMarkRows, resolveUid } from '../clis/douban/utils.js';
 
 function pageWithDelayedProfileRedirect() {
   const hrefs = [
@@ -101,4 +101,65 @@ test('fetchMarkRows returns an empty continuation chunk at the end', async () =>
   const rows = await fetchMarkRows(page, 'example-user', 'collect', 150, 150);
 
   assert.deepEqual(rows, []);
+});
+
+test('fetchChartRows maps a board key to its fixed public URL', async () => {
+  const visited = [];
+  const page = {
+    async goto(url) { visited.push(url); },
+    async wait() {},
+    async evaluate(script) {
+      if (script === 'location.href') return visited.at(-1);
+      if (script.includes('function pageRequiresLogin')) return false;
+      if (script.includes('function extractChart')) return [{ rank: 1, title: '虚构影片' }];
+      throw new Error(`unexpected evaluation: ${script}`);
+    },
+  };
+
+  const rows = await fetchChartRows(page, 'movie_weekly', 10);
+
+  assert.deepEqual(rows, [{ rank: 1, title: '虚构影片' }]);
+  assert.deepEqual(visited, ['https://movie.douban.com/chart']);
+});
+
+test('fetchChartRows bounds Top250 navigation to official page offsets', async () => {
+  const visited = [];
+  let nextRank = 1;
+  const page = {
+    async goto(url) { visited.push(url); },
+    async wait() {},
+    async evaluate(script) {
+      if (script === 'location.href') return visited.at(-1);
+      if (script.includes('function pageRequiresLogin')) return false;
+      if (script.includes('function extractChart')) {
+        return Array.from({ length: 25 }, () => ({ rank: nextRank++, title: '虚构影片' }));
+      }
+      throw new Error(`unexpected evaluation: ${script}`);
+    },
+  };
+
+  const rows = await fetchChartRows(page, 'movie_top250', 30);
+
+  assert.equal(rows.length, 30);
+  assert.deepEqual(visited, [
+    'https://movie.douban.com/top250?start=0',
+    'https://movie.douban.com/top250?start=25',
+  ]);
+});
+
+test('fetchChartRows rejects a redirect away from the fixed public URL', async () => {
+  const page = {
+    async goto() {},
+    async wait() {},
+    async evaluate(script) {
+      if (script === 'location.href') return 'https://example.invalid/redirected';
+      if (script.includes('function pageRequiresLogin')) return false;
+      throw new Error(`unexpected evaluation: ${script}`);
+    },
+  };
+
+  await assert.rejects(
+    fetchChartRows(page, 'movie_weekly', 10),
+    /unexpected page location/i,
+  );
 });

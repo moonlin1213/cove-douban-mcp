@@ -7,7 +7,7 @@ Replay basis: synthetic fixtures plus isolated registry validation
 
 ## Evidence and boundary
 
-The seven commands read ordinary Douban pages that are already visible in
+The eight commands read ordinary Douban pages that are already visible in
 the Chrome session connected through OpenCLI Browser Bridge. They use
 visible page structure as the contract and do not call undocumented write
 endpoints.
@@ -25,4 +25,3 @@ small, fully synthetic HTML fixtures and validates the plugin from an
 isolated temporary OpenCLI home. An optional manual live smoke test may use
 only a dedicated test account and must never upload result bodies, cookies,
 or browser traces.
-

@@ -1,6 +1,6 @@
 {
   "name": "cove-douban-mcp",
-  "version": "0.1.1",
-  "description": "Seven read-only Douban adapters for Cove Douban MCP",
+  "version": "0.2.0",
+  "description": "Eight read-only Douban adapters for Cove Douban MCP",
   "opencli": ">=1.8.0 <2"
 }

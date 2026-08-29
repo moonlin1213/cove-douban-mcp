@@ -1,6 +1,6 @@
 {
   "name": "opencli-plugin-cove-douban-mcp",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "description": "Read-only Douban adapters bundled with Cove Douban MCP",

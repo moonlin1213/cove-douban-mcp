@@ -12,6 +12,8 @@ class CommandSpec:
     minimum_positionals: int
     maximum_positionals: int
     flags: dict[str, frozenset[str] | None]
+    positional_values: tuple[frozenset[str] | None, ...] = ()
+    maximum_integers: dict[str, int] | None = None
 
 
 ALLOWED_COMMANDS: dict[str, CommandSpec] = {
@@ -22,6 +24,24 @@ ALLOWED_COMMANDS: dict[str, CommandSpec] = {
             "--type": frozenset({"movie", "book", "music"}),
             "--limit": None,
         },
+    ),
+    "chart": CommandSpec(
+        1,
+        1,
+        {"--limit": None},
+        (
+            frozenset(
+                {
+                    "movie_weekly",
+                    "movie_north_america",
+                    "movie_new",
+                    "movie_top250",
+                    "book_hot",
+                    "music_hot",
+                }
+            ),
+        ),
+        {"--limit": 250},
     ),
     "subject": CommandSpec(
         1,
@@ -108,8 +128,18 @@ def validate_arguments(command: str, arguments: list[str]) -> list[str]:
                 raise _invalid(f"{argument} must be an integer") from error
             if integer < 0 or (argument == "--limit" and integer < 1):
                 raise _invalid(f"invalid value for {argument}")
+            maximum = (spec.maximum_integers or {}).get(argument)
+            if maximum is not None and integer > maximum:
+                raise _invalid(f"invalid value for {argument}")
         index += 2
 
     if not spec.minimum_positionals <= len(positionals) <= spec.maximum_positionals:
         raise _invalid(f"invalid number of positional arguments for {command}")
+    for position, allowed_values in enumerate(spec.positional_values):
+        if (
+            allowed_values is not None
+            and position < len(positionals)
+            and positionals[position] not in allowed_values
+        ):
+            raise _invalid(f"invalid positional argument for {command}")
     return list(arguments)

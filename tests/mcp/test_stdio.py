@@ -48,6 +48,6 @@ async def test_installed_stdio_server_initializes_with_official_client(tmp_path)
         stderr.seek(0)
         error_output = stderr.read()
 
-    assert len(tools.tools) == 11
+    assert len(tools.tools) == 12
     assert status.structuredContent["ok"] is True
     assert "Traceback" not in error_output

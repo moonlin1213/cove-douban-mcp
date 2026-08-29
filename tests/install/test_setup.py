@@ -24,4 +24,6 @@ def test_approved_setup_writes_only_isolated_roots(cli_runner, isolated_env) -> 
     plugin = isolated_env.opencli_home / "plugins" / "cove-douban-mcp"
     assert (plugin / "opencli-plugin.json").exists()
     assert (plugin / "clis" / "douban" / "search.js").exists()
+    assert (plugin / "clis" / "douban" / "chart.js").exists()
     assert (isolated_env.opencli_home / "clis" / "douban" / "search.js").exists()
+    assert (isolated_env.opencli_home / "clis" / "douban" / "chart.js").exists()

@@ -67,6 +67,19 @@ def gateway() -> FakeGateway:
             "summary": "完全虚构的简介",
         }
     ]
+    gateway.rows["chart"] = [
+        {
+            "rank": 1,
+            "subject_id": "100001",
+            "title": "虚构榜单影片",
+            "url": "https://movie.example.invalid/subject/100001/",
+            "rating": 8.8,
+            "rating_count": 12345,
+            "year": 2026,
+            "summary": "虚构导演 / 虚构演员",
+            "chart_note": "连续上榜 2 周",
+        }
+    ]
     gateway.rows["reviews"] = [
         {"review_id": "300001", "title": "虚构短评", "author": "示例用户"}
     ]
