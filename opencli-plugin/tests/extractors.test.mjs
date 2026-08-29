@@ -161,7 +161,7 @@ test('chart extractor normalizes all six fixed public boards', () => {
       rank: 1,
       subjectId: '300001',
       title: '虚构热门单曲',
-      url: 'https://music.douban.com/subject/300001/',
+      url: 'https://site.douban.com/example-musician/',
       rating: null,
       ratingCount: null,
       year: null,

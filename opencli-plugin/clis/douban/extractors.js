@@ -392,12 +392,14 @@ export function extractChart(document, board) {
   if (board === 'music_hot') {
     return Array.from(document.querySelectorAll('.article li.clearfix'))
       .map((item, index) => {
-        const link = item.querySelector('a.face[href*="/subject/"]');
-        const title = item.querySelector('.intro h3 a') || link;
-        if (!link || !title) return null;
+        const link = item.querySelector('a.face[href]');
+        const title = item.querySelector('.intro h3 a, .intro .icon-play a, .intro a');
+        if (!title) return null;
+        const linkUrl = href(link);
+        const songId = normalize(item.querySelector('[data-sid]')?.getAttribute('data-sid'));
         return row(item.querySelector('.green-num-box')?.textContent || index + 1, title, {
-          url: href(link),
-          subjectId: subjectId(href(link)),
+          url: /^https?:\/\//i.test(linkUrl) ? linkUrl : '',
+          subjectId: subjectId(linkUrl) || songId,
           summary: normalize(item.querySelector('.intro p')?.textContent),
           trend: trend(item.querySelector('.trend')),
           chartNote: normalize(item.querySelector('.days')?.textContent)
