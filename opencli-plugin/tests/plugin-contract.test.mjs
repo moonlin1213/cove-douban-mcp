@@ -7,6 +7,7 @@ import test from 'node:test';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const adapterRoot = join(root, 'clis', 'douban');
 const expected = [
+  'chart.js',
   'doulist.js',
   'doulists.js',
   'marks-full.js',
@@ -19,11 +20,11 @@ const expected = [
 test('plugin declares the supported OpenCLI range and public identity', () => {
   const manifest = JSON.parse(readFileSync(join(root, 'opencli-plugin.json'), 'utf8'));
   assert.equal(manifest.name, 'cove-douban-mcp');
-  assert.equal(manifest.version, '0.1.1');
+  assert.equal(manifest.version, '0.2.0');
   assert.equal(manifest.opencli, '>=1.8.0 <2');
 });
 
-test('exactly seven command adapters are shipped', () => {
+test('exactly eight command adapters are shipped', () => {
   const files = readdirSync(adapterRoot)
     .filter((name) => name.endsWith('.js') && !['extractors.js', 'utils.js'].includes(name))
     .sort();

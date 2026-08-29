@@ -6,6 +6,7 @@ import test from 'node:test';
 import { JSDOM } from 'jsdom';
 
 import {
+  extractChart,
   extractDoulistItems,
   extractDoulists,
   extractMarks,
@@ -91,4 +92,86 @@ test('doulist item extractor returns subject identity', () => {
 test('login page is detected without exposing browser state', () => {
   assert.equal(pageRequiresLogin(fixture('login')), true);
   assert.equal(pageRequiresLogin(fixture('search')), false);
+});
+
+test('chart extractor normalizes all six fixed public boards', () => {
+  const document = fixture('chart', 'https://movie.douban.com/chart');
+  const expected = {
+    movie_weekly: {
+      rank: 1,
+      subjectId: '100001',
+      title: '虚构/口碑影片',
+      url: 'https://movie.douban.com/subject/100001/',
+      rating: null,
+      ratingCount: null,
+      year: null,
+      summary: '',
+      trend: '',
+      chartNote: '连续上榜 2 周',
+    },
+    movie_north_america: {
+      rank: 1,
+      subjectId: '100002',
+      title: '虚构票房影片',
+      url: 'https://movie.douban.com/subject/100002/',
+      rating: null,
+      ratingCount: null,
+      year: null,
+      summary: '',
+      trend: '',
+      chartNote: '1250万美元',
+    },
+    movie_new: {
+      rank: 1,
+      subjectId: '100003',
+      title: '虚构新片',
+      url: 'https://movie.douban.com/subject/100003/',
+      rating: 8.5,
+      ratingCount: 3210,
+      year: 2026,
+      summary: '2026 / 示例地区 / 剧情',
+      trend: '',
+      chartNote: '',
+    },
+    movie_top250: {
+      rank: 1,
+      subjectId: '100004',
+      title: '虚构经典',
+      url: 'https://movie.douban.com/subject/100004/',
+      rating: 9.6,
+      ratingCount: 456789,
+      year: 1994,
+      summary: '导演甲 主演甲 / 1994 / 示例地区 / 剧情',
+      trend: '',
+      chartNote: '虚构经典台词',
+    },
+    book_hot: {
+      rank: 1,
+      subjectId: '200001',
+      title: '虚构热门图书',
+      url: 'https://book.douban.com/subject/200001/',
+      rating: 9.1,
+      ratingCount: 5678,
+      year: null,
+      summary: '作者甲 / 虚构出版社 / 2026',
+      trend: 'up',
+      chartNote: '',
+    },
+    music_hot: {
+      rank: 1,
+      subjectId: '300001',
+      title: '虚构热门单曲',
+      url: 'https://music.douban.com/subject/300001/',
+      rating: null,
+      ratingCount: null,
+      year: null,
+      summary: '音乐人甲 / 2026',
+      trend: 'down',
+      chartNote: '上榜 3 天',
+    },
+  };
+
+  for (const [board, row] of Object.entries(expected)) {
+    assert.deepEqual(extractChart(document, board), [row], board);
+  }
 });

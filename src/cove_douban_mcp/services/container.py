@@ -8,6 +8,7 @@ from cove_douban_mcp.config import ExportPolicy, Settings
 from cove_douban_mcp.export.markdown import ExportService
 from cove_douban_mcp.export.proposals import ProposalStore
 from cove_douban_mcp.services.catalog import CatalogService
+from cove_douban_mcp.services.charts import ChartsService
 from cove_douban_mcp.services.common import Gateway
 from cove_douban_mcp.services.doulists import DoulistsService
 from cove_douban_mcp.services.export import ExportApplicationService
@@ -33,6 +34,7 @@ class ServiceContainer:
     sync_state_store: SyncStateStore
     working_cache: WorkingCache
     catalog: CatalogService
+    charts: ChartsService
     marks: MarksService
     reviews: ReviewsService
     doulists: DoulistsService
@@ -65,6 +67,7 @@ class ServiceContainer:
             max_total_bytes_per_scope=settings.cache.working_max_total_bytes_per_scope,
         )
         catalog = CatalogService(gateway, query_cache, working_cache)
+        charts = ChartsService(gateway, query_cache, working_cache)
         marks = MarksService(gateway, marks_store, query_cache, working_cache)
         reviews = ReviewsService(gateway, query_cache, working_cache)
         doulists = DoulistsService(gateway, query_cache, working_cache)
@@ -99,6 +102,7 @@ class ServiceContainer:
             sync_state_store=sync_state_store,
             working_cache=working_cache,
             catalog=catalog,
+            charts=charts,
             marks=marks,
             reviews=reviews,
             doulists=doulists,

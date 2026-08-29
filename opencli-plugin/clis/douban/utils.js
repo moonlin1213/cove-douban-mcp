@@ -6,6 +6,7 @@ import {
 } from '@jackwener/opencli/errors';
 
 import {
+  extractChart,
   extractMarks,
   extractSubject,
   pageRequiresLogin,
@@ -145,4 +146,70 @@ export async function loadSubjectRow(page, subjectId, subjectType = 'movie') {
     );
   }
   return row;
+}
+
+const CHART_SPECS = Object.freeze({
+  movie_weekly: {
+    url: 'https://movie.douban.com/chart',
+    selector: '#listCont2',
+    maximum: 10,
+  },
+  movie_north_america: {
+    url: 'https://movie.douban.com/chart',
+    selector: '#listCont1',
+    maximum: 10,
+  },
+  movie_new: {
+    url: 'https://movie.douban.com/chart',
+    selector: '.article',
+    maximum: 40,
+  },
+  movie_top250: {
+    url: 'https://movie.douban.com/top250',
+    selector: 'ol.grid_view',
+    maximum: 250,
+    pageSize: 25,
+  },
+  book_hot: {
+    url: 'https://book.douban.com/chart',
+    selector: '#content .article',
+    maximum: 50,
+  },
+  music_hot: {
+    url: 'https://music.douban.com/chart',
+    selector: '#content .article',
+    maximum: 50,
+  },
+});
+
+export async function fetchChartRows(page, board, requestedLimit = 10) {
+  const normalizedBoard = normalizeChoice(board, Object.keys(CHART_SPECS), 'board');
+  const spec = CHART_SPECS[normalizedBoard];
+  const limit = normalizeLimit(requestedLimit, 10, spec.maximum);
+  const pageSize = spec.pageSize || limit;
+  const pageCount = Math.ceil(limit / pageSize);
+  const rows = [];
+
+  for (let pageIndex = 0; pageIndex < pageCount; pageIndex += 1) {
+    const url = new URL(spec.url);
+    if (spec.pageSize) url.searchParams.set('start', String(pageIndex * spec.pageSize));
+    const expectedUrl = url.toString();
+    await navigateVisiblePage(page, expectedUrl, spec.selector);
+    const actualUrl = String(await page.evaluate('location.href') || '');
+    if (actualUrl !== expectedUrl) {
+      throw new CommandExecutionError('Douban chart returned an unexpected page location');
+    }
+    const pageRows = await evaluateExtractor(page, extractChart, normalizedBoard);
+    if (!Array.isArray(pageRows)) {
+      throw new CommandExecutionError('Douban chart returned an unexpected page shape');
+    }
+    rows.push(...pageRows);
+    if (pageRows.length < pageSize) break;
+    if (pageIndex + 1 < pageCount) await page.wait({ time: 1.2 });
+  }
+
+  if (!rows.length) {
+    throw new EmptyResultError('douban chart', `No visible rows for ${normalizedBoard}`);
+  }
+  return rows.slice(0, limit);
 }

@@ -8,6 +8,7 @@ from cove_douban_mcp.mcp.server import create_mcp_server
 EXPECTED_TOOLS = {
     "douban_status",
     "douban_search",
+    "douban_chart",
     "douban_subject",
     "douban_movie_marks",
     "douban_reviews",
@@ -21,7 +22,7 @@ EXPECTED_TOOLS = {
 
 
 @pytest.mark.asyncio
-async def test_server_exposes_exact_v010_tool_surface(container) -> None:
+async def test_server_exposes_v020_tool_surface(container) -> None:
     server = create_mcp_server(container)
 
     async with create_connected_server_and_client_session(
@@ -46,4 +47,3 @@ async def test_tool_returns_structured_error_instead_of_traceback(container) -> 
     assert result.isError is False
     assert result.structuredContent["ok"] is False
     assert result.structuredContent["error"]["code"] == "invalid_argument"
-

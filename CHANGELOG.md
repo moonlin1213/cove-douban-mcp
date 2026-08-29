@@ -2,6 +2,27 @@
 
 All notable changes to this project are documented here.
 
+## 0.2.0 — 2026-08-29
+
+Compatible feature release adding fixed, read-only public charts.
+
+### Added
+
+- A twelfth MCP tool, `douban_chart`, covering the movie weekly chart,
+  North America box office, new releases, movie Top 250, popular books, and
+  popular music.
+- An eighth bundled OpenCLI adapter that maps six allowlisted board keys to
+  fixed Douban URLs and normalizes visible public rows.
+- Bounded Top 250 pagination, successful-query caching, per-client result
+  references, and a safe cached fallback when an explicit refresh fails.
+
+### Security
+
+- Chart calls cannot supply arbitrary URLs, page offsets, browser scripts,
+  headers, cookies, export paths, or shell arguments.
+- Existing cache schemas and all eleven v0.1.x MCP tool contracts are
+  unchanged.
+
 ## 0.1.1 — 2026-08-20
 
 Bugfix release for browser-backed extraction and synchronization reliability.

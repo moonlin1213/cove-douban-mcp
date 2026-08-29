@@ -268,3 +268,145 @@ export function extractDoulistItems(document) {
   }
   return rows;
 }
+
+export function extractChart(document, board) {
+  const normalize = (value) => String(value || '').replace(/\s+/g, ' ').trim();
+  const subjectId = (url) => String(url || '').match(/\/subject\/(\d+)/)?.[1] || '';
+  const numeric = (value) => {
+    const match = normalize(value).replace(/,/g, '').match(/\d+/);
+    return match ? Number.parseInt(match[0], 10) : null;
+  };
+  const rating = (value) => {
+    const parsed = Number.parseFloat(normalize(value));
+    return Number.isFinite(parsed) ? parsed : null;
+  };
+  const href = (link) => link?.href || link?.getAttribute('href') || '';
+  const trend = (node) => {
+    const classes = String(node?.className || '').toLowerCase();
+    if (/\b(?:up|rise)\b/.test(classes)) return 'up';
+    if (/\b(?:down|fall)\b/.test(classes)) return 'down';
+    return '';
+  };
+  const row = (rank, link, fields = {}) => ({
+    rank: Number.parseInt(normalize(rank), 10) || 1,
+    subjectId: subjectId(href(link)),
+    title: normalize(link?.textContent),
+    url: href(link),
+    rating: null,
+    ratingCount: null,
+    year: null,
+    summary: '',
+    trend: '',
+    chartNote: '',
+    ...fields,
+  });
+
+  if (board === 'movie_weekly') {
+    return Array.from(document.querySelectorAll('#listCont2 li'))
+      .map((item, index) => {
+        const link = item.querySelector('.name a[href*="/subject/"]');
+        return link
+          ? row(item.querySelector('.no')?.textContent || index + 1, link, {
+              chartNote: normalize(item.querySelector('.stay')?.textContent),
+            })
+          : null;
+      })
+      .filter(Boolean);
+  }
+
+  if (board === 'movie_north_america') {
+    return Array.from(document.querySelectorAll('#listCont1 li'))
+      .map((item, index) => {
+        const link = item.querySelector('.box_chart a[href*="/subject/"]');
+        return link
+          ? row(item.querySelector('.no')?.textContent || index + 1, link, {
+              chartNote: normalize(item.querySelector('.box_chart_num')?.textContent),
+            })
+          : null;
+      })
+      .filter(Boolean);
+  }
+
+  if (board === 'movie_new') {
+    return Array.from(document.querySelectorAll('.article table tr.item'))
+      .map((item, index) => {
+        const link = item.querySelector('.pl2 a[href*="/subject/"]');
+        if (!link) return null;
+        const summary = normalize(item.querySelector('.pl2 p, p')?.textContent);
+        const yearMatch = summary.match(/\b(18|19|20|21)\d{2}\b/);
+        return row(index + 1, link, {
+          title: normalize(link.textContent).split('/')[0].trim(),
+          rating: rating(item.querySelector('.rating_nums')?.textContent),
+          ratingCount: numeric(item.querySelector('.pl')?.textContent),
+          year: yearMatch ? Number.parseInt(yearMatch[0], 10) : null,
+          summary,
+        });
+      })
+      .filter(Boolean);
+  }
+
+  if (board === 'movie_top250') {
+    return Array.from(document.querySelectorAll('ol.grid_view li div.item'))
+      .map((item, index) => {
+        const link = item.querySelector('.hd a[href*="/subject/"]');
+        const title = item.querySelector('.hd a span.title');
+        if (!link || !title) return null;
+        const paragraph = item.querySelector('.bd > p');
+        const fragments = String(paragraph?.innerHTML || '').split(/<br\s*\/?\s*>/i);
+        const firstLine = normalize(fragments[0]?.replace(/<[^>]+>/g, ' '));
+        const metadata = normalize(fragments[1]?.replace(/<[^>]+>/g, ' '));
+        const yearMatch = metadata.match(/\b(18|19|20|21)\d{2}\b/);
+        return row(item.querySelector('.pic em')?.textContent || index + 1, title, {
+          url: href(link),
+          subjectId: subjectId(href(link)),
+          rating: rating(item.querySelector('.rating_num')?.textContent),
+          ratingCount: numeric(
+            Array.from(item.querySelectorAll('.star span'))
+              .map((node) => normalize(node.textContent))
+              .find((value) => /评价|vote/i.test(value)),
+          ),
+          year: yearMatch ? Number.parseInt(yearMatch[0], 10) : null,
+          summary: [firstLine, metadata].filter(Boolean).join(' / '),
+          chartNote: normalize(item.querySelector('.quote span')?.textContent),
+        });
+      })
+      .filter(Boolean);
+  }
+
+  if (board === 'book_hot') {
+    return Array.from(document.querySelectorAll('li.media'))
+      .map((item, index) => {
+        const link = item.querySelector('.media__body h2 a[href*="/subject/"]');
+        return link
+          ? row(item.querySelector('.green-num-box')?.textContent || index + 1, link, {
+              rating: rating(item.querySelector('.font-small')?.textContent),
+              ratingCount: numeric(item.querySelector('.subject-rating .ml8')?.textContent),
+              summary: normalize(item.querySelector('.subject-abstract')?.textContent),
+              trend: trend(item.querySelector('.trend')),
+            })
+          : null;
+      })
+      .filter(Boolean);
+  }
+
+  if (board === 'music_hot') {
+    return Array.from(document.querySelectorAll('.article li.clearfix'))
+      .map((item, index) => {
+        const link = item.querySelector('a.face[href*="/subject/"]');
+        const title = item.querySelector('.intro h3 a') || link;
+        if (!link || !title) return null;
+        return row(item.querySelector('.green-num-box')?.textContent || index + 1, title, {
+          url: href(link),
+          subjectId: subjectId(href(link)),
+          summary: normalize(item.querySelector('.intro p')?.textContent),
+          trend: trend(item.querySelector('.trend')),
+          chartNote: normalize(item.querySelector('.days')?.textContent)
+            .replace(/^\(/, '')
+            .replace(/\)$/, ''),
+        });
+      })
+      .filter(Boolean);
+  }
+
+  return [];
+}

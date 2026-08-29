@@ -4,8 +4,8 @@
 
 Cove Douban MCP has four explicit boundaries:
 
-1. MCP clients may request only the 11 registered tools.
-2. The Python gateway may start only seven allowlisted OpenCLI commands and
+1. MCP clients may request only the 12 registered tools.
+2. The Python gateway may start only eight allowlisted OpenCLI commands and
    always uses an argument array, never a shell.
 3. The OpenCLI adapters are permanently read-only and rely on pages already
    visible to the user's Chrome session.
@@ -17,6 +17,10 @@ Cove Douban MCP has four explicit boundaries:
 No configuration can enable a Douban write. The adapter package contains no
 rating, mark mutation, review publication, list mutation, download, arbitrary
 URL, or evaluation command.
+
+The chart command accepts only six documented board keys. Each key maps to a
+fixed public Douban URL inside the adapter; callers cannot provide a URL or
+Top 250 page offset.
 
 The Browser Bridge supplies the live browser context. This project does not
 ask users to paste browser credentials, does not read profile files, and does

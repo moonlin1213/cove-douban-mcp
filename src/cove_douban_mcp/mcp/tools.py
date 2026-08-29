@@ -1,4 +1,4 @@
-"""The exact public v0.1.1 MCP tool catalog."""
+"""The public v0.2.0 MCP tool catalog."""
 
 from __future__ import annotations
 
@@ -68,6 +68,31 @@ def register_tools(server: FastMCP, container: ServiceContainer) -> None:
                 limit=limit,
                 refresh=refresh,
                 scope=scope,
+            )
+        )
+
+    @server.tool(name="douban_chart")
+    async def douban_chart(
+        board: Literal[
+            "movie_weekly",
+            "movie_north_america",
+            "movie_new",
+            "movie_top250",
+            "book_hot",
+            "music_hot",
+        ] = "movie_weekly",
+        limit: int = 10,
+        refresh: bool = False,
+        ctx: MCPContext | None = None,
+    ) -> dict[str, Any]:
+        """Read one of six fixed public Douban charts without modifying Douban."""
+
+        return await _safe(
+            container.charts.get(
+                board,
+                limit=limit,
+                refresh=refresh,
+                scope=_scope(ctx) if ctx else "local-client",
             )
         )
 

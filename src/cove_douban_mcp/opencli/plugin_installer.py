@@ -12,6 +12,7 @@ from cove_douban_mcp.domain.errors import DoubanError
 
 ADAPTER_NAMES = (
     "search",
+    "chart",
     "subject",
     "marks",
     "marks-full",
@@ -73,7 +74,7 @@ class PluginInstaller:
             actions=(
                 "create private application-data directories",
                 "write default read-only configuration",
-                "install the bundled plugin and seven conflict-checked local adapters",
+                "install the bundled plugin and eight conflict-checked local adapters",
                 "print generic MCP client configuration",
             ),
             conflicts=self.conflicts(),
